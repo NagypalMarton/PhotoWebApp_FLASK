@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Fényképek</h1>
+  <form method="get" class="d-flex align-items-center gap-2">
+    <label for="sort" class="form-label mb-0">Rendezés:</label>
+    <select id="sort" name="sort" class="form-select" onchange="this.form.submit()">
+      <option value="date" {% if sort == 'date' %}selected{% endif %}>Dátum szerint</option>
+      <option value="name" {% if sort == 'name' %}selected{% endif %}>Név szerint</option>
+    </select>
+  </form>
+</div>
+
+{% if session.get('token') %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="h5">Új kép feltöltése</h2>
+    <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" class="row g-3">
+      <div class="col-md-5">
+        <input class="form-control" type="text" name="name" maxlength="40" placeholder="Kép neve (max 40 karakter)" required>
+      </div>
+      <div class="col-md-5">
+        <input class="form-control" type="file" name="photo" accept="image/*" required>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Feltöltés</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">A feltöltéshez és törléshez bejelentkezés szükséges.</div>
+{% endif %}
+
+<div class="list-group">
+  {% for photo in photos %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <a href="{{ url_for('photo_view', photo_id=photo.id) }}" class="fw-semibold text-decoration-none">{{ photo.name }}</a>
+        <div class="text-muted small">Feltöltve: {{ photo.uploaded_at }}</div>
+      </div>
+      {% if session.get('token') %}
+      <form method="post" action="{{ url_for('delete', photo_id=photo.id) }}" onsubmit="return confirm('Biztosan törlöd ezt a képet?')">
+        <button class="btn btn-outline-danger btn-sm" type="submit">Törlés</button>
+      </form>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="list-group-item text-muted">Még nincs feltöltött kép.</div>
+  {% endfor %}
+</div>
+{% endblock %}

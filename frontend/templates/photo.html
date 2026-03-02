@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-3">
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('index') }}">← Vissza a listához</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h1 class="h4">{{ photo.name }}</h1>
+    <p class="text-muted">Feltöltve: {{ photo.uploaded_at }}</p>
+    <img src="{{ image_url }}" class="img-fluid rounded" alt="{{ photo.name }}">
+  </div>
+</div>
+{% endblock %}
