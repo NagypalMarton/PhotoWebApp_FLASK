@@ -1,7 +1,7 @@
 import os
 
 import requests
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, Response, flash, redirect, render_template, request, session, url_for
 
 
 app = Flask(__name__)
@@ -51,8 +51,30 @@ def photo_view(photo_id: int):
         flash("A backend jelenleg nem elérhető.", "danger")
         return redirect(url_for("index"))
 
-    image_url = backend(photo["image_url"])
+    image_url = url_for("photo_image_proxy", photo_id=photo_id)
     return render_template("photo.html", photo=photo, image_url=image_url)
+
+
+@app.route("/photo/<int:photo_id>/image")
+def photo_image_proxy(photo_id: int):
+    try:
+        response = requests.get(backend(f"/api/photos/{photo_id}/image"), timeout=20)
+    except requests.RequestException:
+        flash("A backend jelenleg nem elérhető.", "danger")
+        return redirect(url_for("photo_view", photo_id=photo_id))
+
+    if not response.ok:
+        if response.status_code == 404:
+            flash("A kép nem található.", "warning")
+        else:
+            flash("A kép betöltése sikertelen.", "danger")
+        return redirect(url_for("photo_view", photo_id=photo_id))
+
+    return Response(
+        response.content,
+        status=response.status_code,
+        content_type=response.headers.get("Content-Type", "application/octet-stream"),
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
