@@ -165,11 +165,10 @@ metadata:
   name: frontend
   namespace: photowebapp
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: frontend
   ports:
     - protocol: TCP
       port: 80
       targetPort: 5000
-      nodePort: 30080
