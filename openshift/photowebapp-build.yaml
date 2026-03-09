@@ -7,7 +7,7 @@ spec:
   source:
     type: Git
     git:
-      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
+      uri: https://github.com/NagypalMarton/PhotoWebApp_FLASK.git
       ref: main
     contextDir: backend
   strategy:
@@ -40,7 +40,7 @@ spec:
   source:
     type: Git
     git:
-      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
+      uri: https://github.com/NagypalMarton/PhotoWebApp_FLASK.git
       ref: main
     contextDir: frontend
   strategy:
