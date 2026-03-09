@@ -1,0 +1,29 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: photowebapp-backend-build
+spec:
+  runPolicy: Serial
+  source:
+    type: Git
+    git:
+      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
+      ref: main
+    contextDir: backend
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: photowebapp-backend:latest
+  triggers:
+    - type: GitHub
+      github:
+        secret: your-github-webhook-secret
+    - type: Generic
+      generic:
+        secret: your-generic-webhook-secret
+    - type: ImageChange
+    - type: ConfigChange
