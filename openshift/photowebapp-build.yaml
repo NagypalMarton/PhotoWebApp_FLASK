@@ -11,9 +11,12 @@ spec:
       ref: main
     contextDir: backend
   strategy:
-    type: Docker
-    dockerStrategy:
-      dockerfilePath: Dockerfile
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.9
+        namespace: openshift
   output:
     to:
       kind: ImageStreamTag
@@ -41,9 +44,12 @@ spec:
       ref: main
     contextDir: frontend
   strategy:
-    type: Docker
-    dockerStrategy:
-      dockerfilePath: Dockerfile
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: python:3.9
+        namespace: openshift
   output:
     to:
       kind: ImageStreamTag
@@ -65,25 +71,17 @@ metadata:
 spec:
   runPolicy: Serial
   source:
-    type: Git
-    git:
-      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
-      ref: main
-    contextDir: openshift
+    type: None
   strategy:
-    type: Docker
-    dockerStrategy:
-      dockerfilePath: mysql.yaml
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: mysql:8.0
+        namespace: openshift
   output:
     to:
       kind: ImageStreamTag
       name: photowebapp-mysql:latest
   triggers:
-    - type: GitHub
-      github:
-        secret: your-github-webhook-secret
-    - type: Generic
-      generic:
-        secret: your-generic-webhook-secret
-    - type: ImageChange
     - type: ConfigChange
