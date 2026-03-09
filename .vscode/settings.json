@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "kubernetes://schema/v1@namespace": "file:///c%3A/Users/nagyp/OneDrive/Tanulmanyi%20Anyagok/BME-VIK/6.%20f%C3%A9l%C3%A9v%20%282025-26%20tavasz%29/PhotoWebApp_FLASK/k8s/photowebapp.yaml"
+    }
+}
