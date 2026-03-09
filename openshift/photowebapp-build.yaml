@@ -27,3 +27,63 @@ spec:
         secret: your-generic-webhook-secret
     - type: ImageChange
     - type: ConfigChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: photowebapp-frontend-build
+spec:
+  runPolicy: Serial
+  source:
+    type: Git
+    git:
+      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
+      ref: main
+    contextDir: frontend
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: photowebapp-frontend:latest
+  triggers:
+    - type: GitHub
+      github:
+        secret: your-github-webhook-secret
+    - type: Generic
+      generic:
+        secret: your-generic-webhook-secret
+    - type: ImageChange
+    - type: ConfigChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: photowebapp-mysql-build
+spec:
+  runPolicy: Serial
+  source:
+    type: Git
+    git:
+      uri: https://github.com/YOUR-USERNAME/YOUR-REPO.git
+      ref: main
+    contextDir: openshift
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: mysql.yaml
+  output:
+    to:
+      kind: ImageStreamTag
+      name: photowebapp-mysql:latest
+  triggers:
+    - type: GitHub
+      github:
+        secret: your-github-webhook-secret
+    - type: Generic
+      generic:
+        secret: your-generic-webhook-secret
+    - type: ImageChange
+    - type: ConfigChange
