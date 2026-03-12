@@ -1,3 +1,19 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: photowebapp-backend
+spec:
+  lookupPolicy:
+    local: true
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: photowebapp-frontend
+spec:
+  lookupPolicy:
+    local: true
+---
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
@@ -63,25 +79,4 @@ spec:
         secret: your-generic-webhook-secret
     - type: ImageChange
     - type: ConfigChange
----
-apiVersion: build.openshift.io/v1
-kind: BuildConfig
-metadata:
-  name: photowebapp-mysql-build
-spec:
-  runPolicy: Serial
-  source:
-    type: None
-  strategy:
-    type: Source
-    sourceStrategy:
-      from:
-        kind: ImageStreamTag
-        name: mysql:8.0
-        namespace: openshift
-  output:
-    to:
-      kind: ImageStreamTag
-      name: photowebapp-mysql:latest
-  triggers:
-    - type: ConfigChange
+
