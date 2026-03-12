@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-	name: frontend
+  name: frontend
 spec:
-	replicas: 1
-	selector:
-		matchLabels:
-			app: frontend
-	template:
-		metadata:
-			labels:
-				app: frontend
-		spec:
-			initContainers:
-				- name: wait-for-backend
-					image: busybox
-					command: ['sh', '-c', 'until nc -z backend 5001; do echo waiting for backend; sleep 2; done;']
-			containers:
-				- name: frontend
-					image: photowebapp-frontend:latest
-					ports:
-						- containerPort: 5000
-					env:
-						- name: BACKEND_URL
-							value: http://backend:5001
-						- name: FLASK_SECRET_KEY
-							valueFrom:
-								secretKeyRef:
-									name: photowebapp-secrets
-									key: FLASK_SECRET_KEY
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      initContainers:
+        - name: wait-for-backend
+          image: busybox
+          command: ['sh', '-c', 'until nc -z backend 5001; do echo waiting for backend; sleep 2; done;']
+      containers:
+        - name: frontend
+          image: photowebapp-frontend:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: BACKEND_URL
+              value: http://backend:5001
+            - name: FLASK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: photowebapp-secrets
+                  key: FLASK_SECRET_KEY
