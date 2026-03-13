@@ -110,61 +110,83 @@ PhotoWebApp_FLASK/
     └── photowebapp.yaml    # Lokális Kubernetes manifest (fejlesztéshez)
 ```
 
-## OpenShift telepítés
+## OpenShift telepítés (UI-alapú)
 
-### Előfeltételek
+A telepítés kizárólag az OpenShift webes konzolán keresztül történik, `oc` CLI nélkül.
 
-- OpenShift / OKD klaszter
-- `oc` CLI eszköz és bejelentkezés a klaszterbe
+### 1) Projekt létrehozás
 
-### 1) ImageStream-ek és BuildConfig-ok létrehozása
-
-```bash
-oc apply -f openshift/photowebapp-build.yaml
-oc start-build photowebapp-backend-build --follow
-oc start-build photowebapp-frontend-build --follow
-```
-
-A `photowebapp-build.yaml` Dockerfile stratégiát használ: a `backend/` és `frontend/` könyvtárakban lévő `Dockerfile`-okat buildeli Python 3.12-slim alapon.
+1. OpenShift Console → **Administrator** nézet
+2. **Home → Projects → Create Project**: név legyen `photowebapp`
 
 ### 2) MySQL deploy
 
-```bash
-oc apply -f openshift/mysql.yaml
-```
+1. **+Add → Import YAML**
+2. Illeszd be az [`openshift/mysql.yaml`](openshift/mysql.yaml) teljes tartalmát
+3. Kattints **Create**
+4. **Workloads → Pods** – ellenőrizd, hogy a `mysql` pod **Running** állapotú
 
-### 3) Backend deploy
+### 3) Backend hozzáadása – Import from Git
 
-```bash
-oc apply -f openshift/backend.yaml
-oc apply -f openshift/backend-service.yaml
-```
+**Developer nézet → +Add → Import from Git**
 
-### 4) Frontend deploy
+| Beállítás | Érték |
+|---|---|
+| Git Repo URL | `https://github.com/NagypalMarton/PhotoWebApp_FLASK` |
+| Image strategy | **Dockerfile** |
+| Context Dir | `backend` |
+| Application name | `backend` |
+| Service port | `5001` |
+| Route | **kikapcsolva** (belső service elég) |
 
-```bash
-oc apply -f openshift/frontend.yaml
-oc apply -f openshift/frontend-service.yaml
-```
+Environment variables:
 
-A startup sorrend garantált az `initContainers` révén:
-- Backend vár a MySQL-re (TCP 3306 ellenőrzés)
-- Frontend vár a Backendre (TCP 5001 ellenőrzés)
+| Név | Érték |
+|---|---|
+| `DATABASE_URL` | `mysql+pymysql://photouser:photopass@mysql:3306/photowebapp` |
+| `SECRET_KEY` | `photowebapp-secrets` secret → `SECRET_KEY` kulcs |
+| `UPLOAD_FOLDER` | `/data/uploads` |
 
-### 5) Automatikus build GitHub push-ra
+### 4) Frontend hozzáadása – Import from Git
 
-A `photowebapp-build.yaml`-ban lévő BuildConfig-ok GitHub webhook triggert tartalmaznak.
+**Developer nézet → +Add → Import from Git**
 
-Webhook URL-ek kinyerése:
+| Beállítás | Érték |
+|---|---|
+| Git Repo URL | `https://github.com/NagypalMarton/PhotoWebApp_FLASK` |
+| Image strategy | **Dockerfile** |
+| Context Dir | `frontend` |
+| Application name | `frontend` |
+| Service port | `5000` |
+| Route | **bekapcsolva** (ez lesz a publikus URL) |
 
-```bash
-oc describe bc/photowebapp-backend-build | grep -A2 "GitHub"
-oc describe bc/photowebapp-frontend-build | grep -A2 "GitHub"
-```
+Environment variables:
 
-GitHub repo → **Settings → Webhooks → Add webhook** → Payload URL: a fenti URL, Content-Type: `application/json`.
+| Név | Érték |
+|---|---|
+| `BACKEND_URL` | `http://backend:5001` |
+| `FLASK_SECRET_KEY` | `photowebapp-secrets` secret → `FLASK_SECRET_KEY` kulcs |
 
-Ezután minden `git push` után az OpenShift automatikusan buildeli és redeployolja az érintett podokat.
+### 5) Automatikus build GitHub push-ra (Webhook)
+
+Az **Import from Git** automatikusan létrehoz egy BuildConfig-ot mindkét szolgáltatáshoz. A GitHub webhook beállításával minden `git push` után új build és automatikus redeployment indul.
+
+**Webhook URL-ek kinyerése az OpenShift UI-ból:**
+
+1. **Administrator → Builds → BuildConfigs**
+2. Nyisd meg a `backend` BuildConfigot
+3. **Configuration** fül → **Webhooks** szakasz → **GitHub** sor → **Copy URL with Secret**
+4. Ismételd meg a `frontend` BuildConfiggal
+
+**Webhook hozzáadása GitHub-on:**
+
+1. GitHub repo → **Settings → Webhooks → Add webhook**
+2. **Payload URL**: a másolt OpenShift webhook URL
+3. **Content type**: `application/json`
+4. **Trigger**: Just the push event
+5. Mentés után: a zöld pipa jelzi a sikeres kapcsolatot
+
+Ezután minden `git push` hatására az OpenShift automatikusan buildeli és redeployolja az érintett podokat.
 
 ## Megjegyzések
 
