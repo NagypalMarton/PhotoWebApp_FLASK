@@ -27,12 +27,8 @@ spec:
       ref: main
     contextDir: backend
   strategy:
-    type: Source
-    sourceStrategy:
-      from:
-        kind: ImageStreamTag
-        name: python:3.9
-        namespace: openshift
+    type: Docker
+    dockerStrategy: {}
   output:
     to:
       kind: ImageStreamTag
@@ -60,12 +56,8 @@ spec:
       ref: main
     contextDir: frontend
   strategy:
-    type: Source
-    sourceStrategy:
-      from:
-        kind: ImageStreamTag
-        name: python:3.9
-        namespace: openshift
+    type: Docker
+    dockerStrategy: {}
   output:
     to:
       kind: ImageStreamTag

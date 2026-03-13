@@ -5,37 +5,37 @@ metadata:
   annotations:
     image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"photowebapp-backend:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"backend\")].image"}]'
 spec:
-	replicas: 1
-	selector:
-		matchLabels:
-			app: backend
-	template:
-		metadata:
-			labels:
-				app: backend
-		spec:
-			initContainers:
-				- name: wait-for-mysql
-					image: busybox
-					command: ['sh', '-c', 'until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;']
-			containers:
-				- name: backend
-					image: photowebapp-backend:latest
-					ports:
-						- containerPort: 5001
-					env:
-						- name: DATABASE_URL
-							value: mysql+pymysql://photouser:photopass@mysql:3306/photowebapp
-						- name: SECRET_KEY
-							valueFrom:
-								secretKeyRef:
-									name: photowebapp-secrets
-									key: SECRET_KEY
-						- name: UPLOAD_FOLDER
-							value: /data/uploads
-					volumeMounts:
-						- name: uploads
-							mountPath: /data/uploads
-			volumes:
-				- name: uploads
-					emptyDir: {}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: busybox
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo waiting for mysql; sleep 2; done;']
+      containers:
+        - name: backend
+          image: photowebapp-backend:latest
+          ports:
+            - containerPort: 5001
+          env:
+            - name: DATABASE_URL
+              value: mysql+pymysql://photouser:photopass@mysql:3306/photowebapp
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: photowebapp-secrets
+                  key: SECRET_KEY
+            - name: UPLOAD_FOLDER
+              value: /data/uploads
+          volumeMounts:
+            - name: uploads
+              mountPath: /data/uploads
+      volumes:
+        - name: uploads
+          emptyDir: {}
