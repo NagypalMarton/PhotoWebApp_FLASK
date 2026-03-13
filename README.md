@@ -193,3 +193,7 @@ Ezután minden `git push` hatására az OpenShift automatikusan buildeli és red
 - A feltöltött képek `emptyDir` volume-on tárolódnak a backendben – pod újraindításkor elvesznek. Persistent tároláshoz `PersistentVolumeClaim` szükséges a backend `uploads` volume-jához is.
 - A MySQL adatai PVC-n tárolódnak, így pod újraindítás esetén megmaradnak.
 - A jelszavak a `mysql.yaml`-ban lévő `Secret`-ben találhatók – éles környezetben ezeket külső titkos kezelőből (pl. Vault) kellene betölteni.
+
+Hasznos linkek:
+- [OpenShift Documentation - creating-images ](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/images/creating-images)
+- [OpenShift Documentation - building_applications](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/building_applications/index)
