@@ -110,7 +110,7 @@ PhotoWebApp_FLASK/
     └── photowebapp.yaml    # Lokális Kubernetes manifest (fejlesztéshez)
 ```
 
-## OpenShift telepítés (UI-alapú)
+## Fejlesztői megjegyzések
 
 A telepítés kizárólag az OpenShift webes konzolán keresztül történik, `oc` CLI nélkül.
 
