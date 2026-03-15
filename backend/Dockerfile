@@ -7,7 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+USER root
 RUN mkdir -p /data/uploads && chgrp -R 0 /data && chmod -R g+rwx /data
+USER 1001
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

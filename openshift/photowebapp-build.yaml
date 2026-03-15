@@ -75,4 +75,15 @@ spec:
           name: photowebapp-webhook-secret
     - type: ImageChange
     - type: ConfigChange
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
