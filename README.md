@@ -92,19 +92,19 @@ A MySQL egy példányban fut PVC-vel, a frontend és backend állapotmentes – 
 PhotoWebApp_FLASK/
 ├── backend/
 │   ├── app.py              # Flask REST API
+│   ├── backend.yaml        # OpenShift: PVC, Deployment, Service
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── frontend/
 │   ├── app.py              # Flask UI
+│   ├── frontend.yaml       # OpenShift: Deployment, Service, Route
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── templates/          # Jinja2 sablonok
+├── mysql/
+│   ├── mysql.yaml          # OpenShift: Secret, PVC, Deployment, Service
+│   └── Dockerfile
 ├── openshift/
-│   ├── mysql.yaml          # MySQL: Secret, PVC, Deployment, Service
-│   ├── backend.yaml        # Backend Deployment (initContainer: vár MySQL-re)
-│   ├── backend-service.yaml
-│   ├── frontend.yaml       # Frontend Deployment (initContainer: vár backend-re)
-│   ├── frontend-service.yaml
 │   └── photowebapp-build.yaml  # ImageStream-ek + BuildConfig-ok
 └── k8s/
     └── photowebapp.yaml    # Lokális Kubernetes manifest (fejlesztéshez)
@@ -122,7 +122,7 @@ A telepítés kizárólag az OpenShift webes konzolán keresztül történik, `o
 ### 2) MySQL deploy
 
 1. **+Add → Import YAML**
-2. Illeszd be az [`openshift/mysql.yaml`](openshift/mysql.yaml) teljes tartalmát
+2. Illeszd be az [`mysql/mysql.yaml`](mysql/mysql.yaml) teljes tartalmát
 3. Kattints **Create**
 4. **Workloads → Pods** – ellenőrizd, hogy a `mysql` pod **Running** állapotú
 
@@ -190,9 +190,9 @@ Ezután minden `git push` hatására az OpenShift automatikusan buildeli és red
 
 ## Megjegyzések
 
-- A feltöltött képek `emptyDir` volume-on tárolódnak a backendben – pod újraindításkor elvesznek. Persistent tároláshoz `PersistentVolumeClaim` szükséges a backend `uploads` volume-jához is.
+- A feltöltött képek PersistentVolumeClaim (`uploads-pvc`, 5Gi) volume-on tárolódnak a backendben – pod újraindítás esetén megmaradnak.
 - A MySQL adatai PVC-n tárolódnak, így pod újraindítás esetén megmaradnak.
-- A jelszavak a `mysql.yaml`-ban lévő `Secret`-ben találhatók – éles környezetben ezeket külső titkos kezelőből (pl. Vault) kellene betölteni.
+- A jelszavak a `mysql/mysql.yaml`-ban lévő `Secret`-ben találhatók – éles környezetben ezeket külső titkos kezelőből (pl. Vault) kellene betölteni.
 
 Hasznos linkek:
 - [OpenShift Documentation - creating-images ](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/images/creating-images)
