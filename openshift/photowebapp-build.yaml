@@ -1,3 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: photowebapp-webhook-secret
+type: Opaque
+stringData:
+  WebHookSecretKey: change-me-to-a-random-secret
+---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
@@ -36,10 +44,8 @@ spec:
   triggers:
     - type: GitHub
       github:
-        secret: your-github-webhook-secret
-    - type: Generic
-      generic:
-        secret: your-generic-webhook-secret
+        secretReference:
+          name: photowebapp-webhook-secret
     - type: ImageChange
     - type: ConfigChange
 ---
@@ -65,10 +71,8 @@ spec:
   triggers:
     - type: GitHub
       github:
-        secret: your-github-webhook-secret
-    - type: Generic
-      generic:
-        secret: your-generic-webhook-secret
+        secretReference:
+          name: photowebapp-webhook-secret
     - type: ImageChange
     - type: ConfigChange
 

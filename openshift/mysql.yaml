@@ -4,12 +4,17 @@ metadata:
   name: photowebapp-secrets
 type: Opaque
 stringData:
+  # IMPORTANT: Replace every CHANGE_THIS_* value with a strong secret
+  # before applying this file. After applying, update the values via
+  # OpenShift Console -> Workloads -> Secrets -> photowebapp-secrets -> Edit Secret.
   MYSQL_DATABASE: photowebapp
   MYSQL_USER: photouser
-  MYSQL_PASSWORD: photopass
-  MYSQL_ROOT_PASSWORD: rootpass
-  SECRET_KEY: backend-secret-key
-  FLASK_SECRET_KEY: frontend-secret-key
+  MYSQL_PASSWORD: CHANGE_THIS_STRONG_PASSWORD
+  MYSQL_ROOT_PASSWORD: CHANGE_THIS_ROOT_PASSWORD
+  SECRET_KEY: CHANGE_THIS_BACKEND_SECRET_KEY
+  FLASK_SECRET_KEY: CHANGE_THIS_FRONTEND_SECRET_KEY
+  # Keep DATABASE_URL in sync with MYSQL_USER / MYSQL_PASSWORD above.
+  DATABASE_URL: mysql+pymysql://photouser:CHANGE_THIS_STRONG_PASSWORD@mysql:3306/photowebapp
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
