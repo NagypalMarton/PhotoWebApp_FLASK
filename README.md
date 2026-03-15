@@ -103,7 +103,7 @@ PhotoWebApp_FLASK/
 │   └── templates/          # Jinja2 sablonok
 ├── mysql/
 │   ├── mysql.yaml          # OpenShift: Secret, PVC, Deployment, Service
-│   └── Dockerfile
+│   └── Dockerfile          # OpenShift-kompatibilis MySQL image (UBI9 + mysql-server)
 ├── openshift/
 │   └── photowebapp-build.yaml  # ImageStream-ek + BuildConfig-ok
 └── k8s/
@@ -119,64 +119,46 @@ A telepítés kizárólag az OpenShift webes konzolán keresztül történik, `o
 1. OpenShift Console → **Administrator** nézet
 2. **Home → Projects → Create Project**: név legyen `photowebapp`
 
-### 2) MySQL deploy
+### 2) Build infrastruktúra – ImageStream-ek és BuildConfig-ok
+
+1. **+Add → Import YAML**
+2. Illeszd be az [`openshift/photowebapp-build.yaml`](openshift/photowebapp-build.yaml) teljes tartalmát
+3. Kattints **Create**
+4. **Builds → BuildConfigs** – a `photowebapp-backend-build` és `photowebapp-frontend-build` BuildConfig-ok automatikusan elindulnak (ConfigChange trigger)
+5. Várd meg, amíg mindkét build sikeresen befejezik (**Builds → Builds** → zöld pipa)
+
+### 3) MySQL deploy
 
 1. **+Add → Import YAML**
 2. Illeszd be az [`mysql/mysql.yaml`](mysql/mysql.yaml) teljes tartalmát
 3. Kattints **Create**
 4. **Workloads → Pods** – ellenőrizd, hogy a `mysql` pod **Running** állapotú
 
-### 3) Backend hozzáadása – Import from Git
+### 4) Backend deploy
 
-**Developer nézet → +Add → Import from Git**
+1. **+Add → Import YAML**
+2. Illeszd be a [`backend/backend.yaml`](backend/backend.yaml) teljes tartalmát
+3. Kattints **Create**
+4. A Deployment az ImageStream trigger segítségével automatikusan frissül, amint a `photowebapp-backend:latest` kép elérhető
 
-| Beállítás | Érték |
-|---|---|
-| Git Repo URL | `https://github.com/NagypalMarton/PhotoWebApp_FLASK` |
-| Image strategy | **Dockerfile** |
-| Context Dir | `backend` |
-| Application name | `backend` |
-| Service port | `5001` |
-| Route | **kikapcsolva** (belső service elég) |
+### 5) Frontend deploy
 
-Environment variables:
+1. **+Add → Import YAML**
+2. Illeszd be a [`frontend/frontend.yaml`](frontend/frontend.yaml) teljes tartalmát
+3. Kattints **Create**
+4. A Deployment az ImageStream trigger segítségével automatikusan frissül, amint a `photowebapp-frontend:latest` kép elérhető
+5. **Networking → Routes** – a `frontend` route-on érhető el az alkalmazás (HTTPS)
 
-| Név | Érték |
-|---|---|
-| `DATABASE_URL` | `mysql+pymysql://photouser:photopass@mysql:3306/photowebapp` |
-| `SECRET_KEY` | `photowebapp-secrets` secret → `SECRET_KEY` kulcs |
-| `UPLOAD_FOLDER` | `/data/uploads` |
+### 6) Automatikus build GitHub push-ra (Webhook)
 
-### 4) Frontend hozzáadása – Import from Git
-
-**Developer nézet → +Add → Import from Git**
-
-| Beállítás | Érték |
-|---|---|
-| Git Repo URL | `https://github.com/NagypalMarton/PhotoWebApp_FLASK` |
-| Image strategy | **Dockerfile** |
-| Context Dir | `frontend` |
-| Application name | `frontend` |
-| Service port | `5000` |
-| Route | **bekapcsolva** (ez lesz a publikus URL) |
-
-Environment variables:
-
-| Név | Érték |
-|---|---|
-| `BACKEND_URL` | `http://backend:5001` |
-| `FLASK_SECRET_KEY` | `photowebapp-secrets` secret → `FLASK_SECRET_KEY` kulcs |
-
-### 5) Automatikus build GitHub push-ra (Webhook)
-
-Az **Import from Git** automatikusan létrehoz egy BuildConfig-ot mindkét szolgáltatáshoz. A GitHub webhook beállításával minden `git push` után új build és automatikus redeployment indul.
+A `photowebapp-build.yaml`-ban lévő BuildConfig-ok GitHub webhook triggert tartalmaznak. A webhook beállításával minden `git push` után új build és automatikus redeployment indul.
 
 **Webhook URL-ek kinyerése az OpenShift UI-ból:**
 
 1. **Administrator → Builds → BuildConfigs**
-2. Nyisd meg a `backend` BuildConfigot
+2. Nyisd meg a `photowebapp-backend-build` BuildConfigot
 3. **Configuration** fül → **Webhooks** szakasz → **GitHub** sor → **Copy URL with Secret**
-4. Ismételd meg a `frontend` BuildConfiggal
+4. Ismételd meg a `photowebapp-frontend-build` BuildConfiggal
 
 **Webhook hozzáadása GitHub-on:**
 
@@ -193,6 +175,7 @@ Ezután minden `git push` hatására az OpenShift automatikusan buildeli és red
 - A feltöltött képek PersistentVolumeClaim (`uploads-pvc`, 5Gi) volume-on tárolódnak a backendben – pod újraindítás esetén megmaradnak.
 - A MySQL adatai PVC-n tárolódnak, így pod újraindítás esetén megmaradnak.
 - A jelszavak a `mysql/mysql.yaml`-ban lévő `Secret`-ben találhatók – éles környezetben ezeket külső titkos kezelőből (pl. Vault) kellene betölteni.
+- A `mysql/Dockerfile` most már egy Red Hat UBI9 alapú, OpenShift-kompatibilis MySQL image-et készít. Használható saját buildhez, ha nem a hivatalos MySQL image-t szeretnéd használni.
 
 Hasznos linkek:
 - [OpenShift Documentation - creating-images ](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/images/creating-images)
