@@ -4,7 +4,7 @@ metadata:
   name: photowebapp-webhook-secret
 type: Opaque
 stringData:
-  WebHookSecretKey: change-me-to-a-random-secret
+  WebHookSecretKey: 11574e8c6d70b1e5cf3871aff4710b9526a43fa4
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
@@ -31,7 +31,7 @@ spec:
   source:
     type: Git
     git:
-      uri: https://github.com/NagypalMarton/PhotoWebApp_FLASK.git
+      uri: https://github.com/NagypalMarton/PhotoWebApp_PaaS.git
       ref: main
     contextDir: backend
   strategy:
@@ -58,7 +58,7 @@ spec:
   source:
     type: Git
     git:
-      uri: https://github.com/NagypalMarton/PhotoWebApp_FLASK.git
+      uri: https://github.com/NagypalMarton/PhotoWebApp_PaaS.git
       ref: main
     contextDir: frontend
   strategy:
